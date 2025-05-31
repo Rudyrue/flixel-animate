@@ -1,0 +1,155 @@
+package animate;
+
+import animate.FormatJson;
+import animate._internal.*;
+import animate._internal.Element;
+import flixel.FlxG;
+import flixel.graphics.FlxGraphic;
+import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.math.FlxMatrix;
+import flixel.math.FlxPoint;
+import flixel.math.FlxRect;
+import haxe.Json;
+import openfl.utils.Assets;
+
+using StringTools;
+
+class FlxAnimateFrames extends FlxAtlasFrames
+{
+	public var timeline:Timeline;
+	public var instance:SymbolInstance;
+	public var dictionary:Map<String, SymbolItem>;
+	public var path:String;
+
+	public function getSymbol(name:String)
+	{
+		if (dictionary.exists(name))
+			return dictionary.get(name);
+
+		// Didnt load at first for some reason?
+		if (_loadedData != null)
+		{
+			for (data in _loadedData.SD)
+			{
+				if (data.SN == name)
+				{
+					var timeline = new Timeline(data.TL, this, data.SN);
+					var symbol = new SymbolItem(timeline);
+					dictionary.set(timeline.name, symbol);
+					return symbol;
+				}
+			}
+		}
+
+		FlxG.log.warn('SymbolItem with name "$name" doesnt exist.');
+		return null;
+	}
+
+	public function new(graphic:FlxGraphic)
+	{
+		super(graphic);
+		dictionary = [];
+		matrix = new FlxMatrix();
+	}
+
+	static function listSpritemaps(path:String):Array<String>
+	{
+		final filter = (str:String) -> return str.contains("spritemap") && str.endsWith(".json");
+
+		#if sys
+		var list:Array<String> = sys.FileSystem.readDirectory(path);
+		return list.filter(filter);
+		#else
+		var openflList = Assets.list(TEXT).filter((str) -> return str.startsWith(path));
+		var list:Array<String> = [];
+		for (i in openflList)
+		{
+			if (filter(i))
+				list.push(i.split("/").pop());
+		}
+		return list;
+		#end
+	}
+
+	var _loadedData:AnimationJson;
+
+	public static function fromAnimate(path:String):FlxAnimateFrames
+	{
+		var animContent = FlxG.assets.getText(path + "/Animation.json").replace(String.fromCharCode(0xFEFF), "");
+		var animation:AnimationJson = Json.parse(animContent);
+
+		var frames = new FlxAnimateFrames(null);
+		frames.path = path;
+		frames._loadedData = animation;
+
+		// Load all spritemaps
+		for (sm in listSpritemaps(path))
+		{
+			var id = sm.split("spritemap")[1].split(".")[0];
+
+			var graphic = FlxG.bitmap.add(path + '/spritemap$id.png');
+			var atlas = new FlxAtlasFrames(graphic);
+
+			var smContent = FlxG.assets.getText(path + '/spritemap$id.json').replace(String.fromCharCode(0xFEFF), "");
+			var spritemap:SpritemapJson = Json.parse(smContent);
+
+			for (sprite in spritemap.ATLAS.SPRITES)
+			{
+				var sprite = sprite.SPRITE;
+				var rect = FlxRect.get(sprite.x, sprite.y, sprite.w, sprite.h);
+				var size = FlxPoint.get(sprite.w, sprite.h);
+				atlas.addAtlasFrame(rect, size, FlxPoint.get(), sprite.name, sprite.rotated ? ANGLE_NEG_90 : ANGLE_0);
+			}
+
+			frames.addAtlas(atlas);
+		}
+
+		var symbols = animation.SD;
+		if (symbols != null && symbols.length > 0)
+		{
+			var i = symbols.length - 1;
+			while (i > -1)
+			{
+				var data = symbols[i--];
+				var timeline = new Timeline(data.TL, frames, data.SN);
+				frames.dictionary.set(timeline.name, new SymbolItem(timeline));
+			}
+		}
+
+		frames.frameRate = animation.MD.FRT;
+
+		frames.timeline = new Timeline(animation.AN.TL, frames, animation.AN.N);
+		frames.dictionary.set(frames.timeline.name, new SymbolItem(frames.timeline)); // Add main symbol to the library too
+
+		var stageInstance:Null<SymbolInstanceJson> = animation.AN.STI;
+		if (stageInstance != null)
+		{
+			frames.matrix = stageInstance.MX.toMatrix();
+			frames.matrix.translate(-stageInstance.TRP.x, -stageInstance.TRP.y);
+		}
+		else
+		{
+			frames.matrix.identity();
+		}
+
+		frames._loadedData = null;
+
+		return frames;
+	}
+
+	// public var stageInstance:SymbolInstanceJson;
+	public var matrix:FlxMatrix;
+	public var frameRate:Float;
+
+	override function destroy():Void
+	{
+		super.destroy();
+
+		for (key => symbol in dictionary)
+			symbol.destroy();
+
+		dictionary = null;
+		matrix = null;
+		timeline = null;
+	}
+}

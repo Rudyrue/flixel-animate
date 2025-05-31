@@ -1,0 +1,13 @@
+{
+    "name": "flixel-animate",
+    "url": "https://github.com/MaybeMaru/flixel-animate",
+    "license": "MIT",
+    "tags": ["flixel"],
+    "description": "Personal Adobe Animate texture atlas HaxeFlixel implementation.",
+    "version": "1.0.0",
+    "releasenote": "Initial release.",
+    "contributors": ["MaybeMaru"],
+	"dependencies": {
+		"flixel": ""
+	}
+}
