@@ -9,6 +9,129 @@ class FlxAnimateController extends FlxAnimationController
 {
 	public function addByLabel(name:String, label:String, ?frameRate:Float, ?looped:Bool):Void
 	{
+		if (!isAnimate)
+		{
+			FlxG.log.warn('Sprite is not loaded with a texture atlas.');
+			return;
+		}
+
+		var foundFrames = findLabelIndices(label);
+
+		if (foundFrames.length <= 0)
+		{
+			FlxG.log.warn('No frames found with label "$label".');
+			return;
+		}
+
+		frameRate ??= getDefaultFramerate();
+
+		var anim = new FlxAnimateAnimation(this, name, foundFrames, frameRate, looped);
+		anim.timeline = _animate.library.timeline;
+		_animations.set(name, anim);
+	}
+
+	public function addByLabelIndices(name:String, label:String, indices:Array<Int>, ?frameRate:Float, ?looped:Bool)
+	{
+		if (!isAnimate)
+		{
+			FlxG.log.warn('Sprite is not loaded with a texture atlas.');
+			return;
+		}
+
+		var foundFrames:Array<Int> = findLabelIndices(label);
+		var useableFrames:Array<Int> = [];
+
+		for (index in indices)
+		{
+			var frameIndex:Null<Int> = foundFrames[index];
+			if (frameIndex != null)
+				useableFrames.push(frameIndex);
+		}
+
+		if (useableFrames.length <= 0)
+		{
+			FlxG.log.warn('No frames useable with label "$label" and indices $indices.');
+			return;
+		}
+
+		frameRate ??= getDefaultFramerate();
+
+		var anim = new FlxAnimateAnimation(this, name, useableFrames, frameRate, looped);
+		anim.timeline = _animate.library.timeline;
+		_animations.set(name, anim);
+	}
+
+	public function addByTimeline(name:String, timeline:Timeline, ?frameRate:Float, ?looped:Bool):Void
+	{
+		if (!isAnimate)
+		{
+			FlxG.log.warn('Sprite is not loaded with a texture atlas.');
+			return;
+		}
+
+		addByTimelineIndices(name, timeline, [for (i in 0...timeline.frameCount) i], frameRate, looped);
+	}
+
+	public function addByTimelineIndices(name:String, timeline:Timeline, indices:Array<Int>, ?frameRate:Float, ?looped:Bool):Void
+	{
+		if (!isAnimate)
+		{
+			FlxG.log.warn('Sprite is not loaded with a texture atlas.');
+			return;
+		}
+
+		frameRate ??= getDefaultFramerate();
+		var anim = new FlxAnimateAnimation(this, name, indices, frameRate, looped);
+		anim.timeline = timeline;
+		_animations.set(name, anim);
+	}
+
+	public function addBySymbol(name:String, symbolName:String, ?frameRate:Float, ?looped:Bool):Void
+	{
+		if (!isAnimate)
+		{
+			FlxG.log.warn('Sprite is not loaded with a texture atlas.');
+			return;
+		}
+
+		var symbol = _animate.library.getSymbol(symbolName);
+		if (symbol == null)
+		{
+			FlxG.log.warn('Symbol not found with name "$symbolName"');
+			return;
+		}
+
+		frameRate ??= getDefaultFramerate();
+
+		var anim = new FlxAnimateAnimation(this, name, [for (i in 0...symbol.timeline.frameCount) i], frameRate, looped);
+		anim.timeline = symbol.timeline;
+		_animations.set(name, anim);
+	}
+
+	public function addBySymbolIndices(name:String, symbolName:String, indices:Array<Int>, ?frameRate:Float, ?looped:Bool):Void
+	{
+		if (!isAnimate)
+		{
+			FlxG.log.warn('Sprite is not loaded with a texture atlas.');
+			return;
+		}
+
+		var symbol = _animate.library.getSymbol(symbolName);
+		if (symbol == null)
+		{
+			FlxG.log.warn('Symbol not found with name "$symbolName"');
+			return;
+		}
+
+		frameRate ??= getDefaultFramerate();
+
+		var anim = new FlxAnimateAnimation(this, name, indices, frameRate, looped);
+		anim.timeline = symbol.timeline;
+		_animations.set(name, anim);
+	}
+
+	function findLabelIndices(label:String):Array<Int>
+	{
 		var foundFrames:Array<Int> = [];
 		var hasFoundLabel:Bool = false;
 		var mainTimeline = _animate.library.timeline;
@@ -30,56 +153,7 @@ class FlxAnimateController extends FlxAnimationController
 				break;
 		}
 
-		if (foundFrames.length <= 0)
-		{
-			FlxG.log.warn('No frames found with label "$label".');
-			return;
-		}
-
-		frameRate ??= getDefaultFramerate();
-
-		var anim = new FlxAnimateAnimation(this, name, foundFrames, frameRate, looped);
-		anim.timeline = mainTimeline;
-		_animations.set(name, anim);
-	}
-
-	public function addByTimeline(name:String, timeline:Timeline, ?frameRate:Float, ?looped:Bool):Void
-	{
-		addByTimelineIndices(name, timeline, [for (i in 0...timeline.frameCount) i], frameRate, looped);
-	}
-
-	public function addByTimelineIndices(name:String, timeline:Timeline, indices:Array<Int>, ?frameRate:Float, ?looped:Bool):Void
-	{
-		frameRate ??= getDefaultFramerate();
-		var anim = new FlxAnimateAnimation(this, name, indices, frameRate, looped);
-		anim.timeline = timeline;
-		_animations.set(name, anim);
-	}
-
-	public function addBySymbol(name:String, symbolName:String, ?frameRate:Float, ?looped:Bool):Void
-	{
-		var symbol = _animate.library.getSymbol(symbolName);
-		if (symbol == null)
-			return;
-
-		frameRate ??= getDefaultFramerate();
-
-		var anim = new FlxAnimateAnimation(this, name, [for (i in 0...symbol.timeline.frameCount) i], frameRate, looped);
-		anim.timeline = symbol.timeline;
-		_animations.set(name, anim);
-	}
-
-	public function addBySymbolIndices(name:String, symbolName:String, indices:Array<Int>, ?frameRate:Float, ?looped:Bool):Void
-	{
-		var symbol = _animate.library.getSymbol(symbolName);
-		if (symbol == null)
-			return;
-
-		frameRate ??= getDefaultFramerate();
-
-		var anim = new FlxAnimateAnimation(this, name, indices, frameRate, looped);
-		anim.timeline = symbol.timeline;
-		_animations.set(name, anim);
+		return foundFrames;
 	}
 
 	override function set_frameIndex(frame:Int):Int
