@@ -1,6 +1,6 @@
 package animate._internal;
 
-import animate.FormatJson;
+import animate.FlxAnimateJson;
 import animate._internal.filters.*;
 import flixel.FlxCamera;
 import flixel.FlxG;

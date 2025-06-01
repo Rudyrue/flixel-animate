@@ -283,11 +283,24 @@ abstract MetadataJson(Dynamic)
 	public var V(get, never):String;
 	public var FRT(get, never):Float;
 
+	public var W(get, never):Int;
+	public var H(get, never):Int;
+	public var BGC(get, never):String;
+
 	inline function get_V()
 		return this.V ?? this.version;
 
 	inline function get_FRT()
 		return this.FRT ?? this.framerate;
+
+	inline function get_W()
+		return this.W ?? this.width ?? 0;
+
+	inline function get_H()
+		return this.H ?? this.height ?? 0;
+
+	inline function get_BGC()
+		return this.BGC ?? this.backgroundColor ?? "#FFFFFF";
 }
 
 abstract ColorJson(Dynamic)

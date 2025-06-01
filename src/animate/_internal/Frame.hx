@@ -1,6 +1,6 @@
 package animate._internal;
 
-import animate.FormatJson.FrameJson;
+import animate.FlxAnimateJson.FrameJson;
 import animate._internal.Element;
 import flixel.FlxCamera;
 import flixel.FlxG;

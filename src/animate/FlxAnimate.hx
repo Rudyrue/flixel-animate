@@ -1,13 +1,16 @@
 package animate;
 
 import animate.FlxAnimateController.FlxAnimateAnimation;
-import animate.FormatJson;
+import animate.FlxAnimateJson;
 import animate._internal.*;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.animation.FlxAnimationController;
 import flixel.graphics.frames.FlxFramesCollection;
+import flixel.system.FlxBGSprite;
+import flixel.util.FlxColor;
+import flixel.util.FlxDestroyUtil;
 import haxe.Json;
 
 class FlxAnimate extends FlxSprite
@@ -60,6 +63,7 @@ class FlxAnimate extends FlxSprite
 		}
 	}
 
+	public var applyStageMatrix:Bool = true;
 	public var renderStage:Bool = false;
 
 	function drawAnimate(camera:FlxCamera)
@@ -69,7 +73,7 @@ class FlxAnimate extends FlxSprite
 
 		_matrix.setTo(flipX ? -1 : 1, 0, 0, flipY ? -1 : 1, 0, 0);
 
-		if (renderStage)
+		if (applyStageMatrix)
 			_matrix.concat(library.matrix);
 
 		_matrix.translate(-origin.x, -origin.y);
@@ -86,7 +90,24 @@ class FlxAnimate extends FlxSprite
 		_point.add(origin.x, origin.y);
 		_matrix.translate(_point.x, _point.y);
 
+		if (renderStage)
+			drawStage(camera);
+
 		timeline.draw(camera, _matrix, colorTransform, blend, antialiasing, shader);
+	}
+
+	var stageBg:FlxSprite;
+
+	function drawStage(camera:FlxCamera)
+	{
+		if (stageBg == null)
+			stageBg = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE, false, "flxanimate_stagebg_graphic_");
+
+		stageBg.color = library.stageColor;
+		stageBg.setPosition(x, y);
+		stageBg.setGraphicSize(library.stageRect.width, library.stageRect.height);
+		stageBg.updateHitbox();
+		stageBg.drawComplex(camera);
 	}
 
 	override function get_numFrames():Int
@@ -103,5 +124,6 @@ class FlxAnimate extends FlxSprite
 		anim = null;
 		library = null;
 		timeline = null;
+		stageBg = FlxDestroyUtil.destroy(stageBg);
 	}
 }

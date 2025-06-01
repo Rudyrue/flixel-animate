@@ -1,11 +1,10 @@
 package animate;
 
-import flixel.addons.display.FlxRuntimeShader;
 import flixel.system.FlxAssets.FlxShader;
 
 using StringTools;
 
-class FlxChainedShader extends FlxRuntimeShader
+class FlxChainedShader extends #if !flash flixel.addons.display.FlxRuntimeShader #else FlxShader #end
 {
 	// TODO: add a "setShaders" function
 	// TODO: vertex source combiner
@@ -52,7 +51,7 @@ class FlxChainedShader extends FlxRuntimeShader
 			}
 		');
 
-		super(fragBuf.toString());
+		super(#if !flash fragBuf.toString() #end);
 	}
 
 	var __shaders:Array<FlxShader> = [];
@@ -75,11 +74,13 @@ class FlxChainedShader extends FlxRuntimeShader
 		}
 	}
 
+	#if !flash
 	override function __init()
 	{
 		__prepareValues();
 		super.__init();
 	}
+	#end
 
 	private function extractShaderLogic(source:String, index:Int):ShaderLogic
 	{

@@ -1,6 +1,6 @@
 package animate;
 
-import animate.FormatJson;
+import animate.FlxAnimateJson;
 import animate._internal.*;
 import animate._internal.Element;
 import flixel.FlxG;
@@ -9,6 +9,8 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
+import flixel.util.FlxColor;
+import flixel.util.FlxDestroyUtil;
 import haxe.Json;
 import openfl.utils.Assets;
 
@@ -49,7 +51,6 @@ class FlxAnimateFrames extends FlxAtlasFrames
 	{
 		super(graphic);
 		dictionary = [];
-		matrix = new FlxMatrix();
 	}
 
 	static function listSpritemaps(path:String):Array<String>
@@ -117,27 +118,28 @@ class FlxAnimateFrames extends FlxAtlasFrames
 		}
 
 		frames.frameRate = animation.MD.FRT;
-
 		frames.timeline = new Timeline(animation.AN.TL, frames, animation.AN.N);
 		frames.dictionary.set(frames.timeline.name, new SymbolItem(frames.timeline)); // Add main symbol to the library too
 
-		var stageInstance:Null<SymbolInstanceJson> = animation.AN.STI;
-		if (stageInstance != null)
-		{
-			frames.matrix = stageInstance.MX.toMatrix();
-			frames.matrix.translate(-stageInstance.TRP.x, -stageInstance.TRP.y);
-		}
-		else
-		{
-			frames.matrix.identity();
-		}
+		// stage background color
+		var w = animation.MD.W;
+		var h = animation.MD.H;
+		frames.stageRect = (w > 0 && h > 0) ? FlxRect.get(0, 0, w, h) : FlxRect.get();
+		frames.stageColor = FlxColor.fromString(animation.MD.BGC);
 
+		// stage instance of the main symbol
+		var stageInstance:Null<SymbolInstanceJson> = animation.AN.STI;
+		frames.matrix = (stageInstance != null) ? stageInstance.MX.toMatrix() : new FlxMatrix();
+
+		// clear the temp data crap
 		frames._loadedData = null;
 
 		return frames;
 	}
 
 	// public var stageInstance:SymbolInstanceJson;
+	public var stageRect:FlxRect;
+	public var stageColor:FlxColor;
 	public var matrix:FlxMatrix;
 	public var frameRate:Float;
 
@@ -145,9 +147,10 @@ class FlxAnimateFrames extends FlxAtlasFrames
 	{
 		super.destroy();
 
-		for (key => symbol in dictionary)
+		for (symbol in dictionary.iterator())
 			symbol.destroy();
 
+		stageRect = FlxDestroyUtil.put(stageRect);
 		dictionary = null;
 		matrix = null;
 		timeline = null;

@@ -1,6 +1,6 @@
 package animate._internal;
 
-import animate.FormatJson.TimelineJson;
+import animate.FlxAnimateJson.TimelineJson;
 import flixel.FlxCamera;
 import flixel.math.FlxMatrix;
 import flixel.system.FlxAssets.FlxShader;

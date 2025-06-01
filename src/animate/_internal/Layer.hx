@@ -1,6 +1,6 @@
 package animate._internal;
 
-import animate.FormatJson.LayerJson;
+import animate.FlxAnimateJson.LayerJson;
 import flixel.util.FlxDestroyUtil;
 
 class Layer implements IFlxDestroyable
