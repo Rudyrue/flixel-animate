@@ -8,15 +8,22 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.animation.FlxAnimationController;
 import flixel.graphics.frames.FlxFramesCollection;
+import flixel.math.FlxAngle;
+import flixel.math.FlxMatrix;
+import flixel.math.FlxPoint;
 import flixel.system.FlxBGSprite;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import haxe.Json;
 
+using flixel.util.FlxColorTransformUtil;
+
 class FlxAnimate extends FlxSprite
 {
 	public var library:FlxAnimateFrames;
 	public var anim:FlxAnimateController;
+
+	public var skew:FlxPoint;
 
 	public var isAnimate(default, null):Bool = false;
 	public var timeline:Timeline;
@@ -25,6 +32,7 @@ class FlxAnimate extends FlxSprite
 	{
 		super.initVars();
 		anim = new FlxAnimateController(this);
+		skew = new FlxPoint();
 		animation = anim;
 	}
 
@@ -85,6 +93,12 @@ class FlxAnimate extends FlxSprite
 			_matrix.rotateWithTrig(_cosAngle, _sinAngle);
 		}
 
+		if (skew.x != 0 || skew.y != 0)
+		{
+			updateSkew();
+			_matrix.concat(_skewMatrix);
+		}
+
 		getScreenPosition(_point, camera);
 		_point.add(-offset.x, -offset.y);
 		_point.add(origin.x, origin.y);
@@ -103,11 +117,22 @@ class FlxAnimate extends FlxSprite
 		if (stageBg == null)
 			stageBg = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE, false, "flxanimate_stagebg_graphic_");
 
+		var mat = stageBg._matrix;
+		mat.identity();
+		mat.scale(library.stageRect.width, library.stageRect.height);
+		mat.translate(-0.5 * (mat.a - 1), -0.5 * (mat.d - 1));
+		mat.concat(this._matrix);
+
 		stageBg.color = library.stageColor;
-		stageBg.setPosition(x, y);
-		stageBg.setGraphicSize(library.stageRect.width, library.stageRect.height);
-		stageBg.updateHitbox();
-		stageBg.drawComplex(camera);
+		stageBg.colorTransform.concat(this.colorTransform);
+		camera.drawPixels(stageBg.frame, stageBg.framePixels, stageBg._matrix, stageBg.colorTransform, blend, antialiasing, shader);
+	}
+
+	static var _skewMatrix:FlxMatrix = new FlxMatrix();
+
+	function updateSkew()
+	{
+		_skewMatrix.setTo(1, Math.tan(skew.y * FlxAngle.TO_RAD), Math.tan(skew.x * FlxAngle.TO_RAD), 1, 0, 0);
 	}
 
 	override function get_numFrames():Int
@@ -125,5 +150,6 @@ class FlxAnimate extends FlxSprite
 		library = null;
 		timeline = null;
 		stageBg = FlxDestroyUtil.destroy(stageBg);
+		skew = FlxDestroyUtil.put(skew);
 	}
 }
