@@ -101,4 +101,9 @@ class Frame implements IFlxDestroyable
 				element.draw(camera, currentFrame, this, parentMatrix, transform, blend, antialiasing, shader);
 		}
 	}
+
+	public function toString():String
+	{
+		return '{name: "$name", index: $index, duration: $duration}';
+	}
 }

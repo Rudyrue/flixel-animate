@@ -4,6 +4,12 @@ import flixel.system.FlxAssets.FlxShader;
 
 using StringTools;
 
+/**
+ * FlxShader for combining multiple shaders into one.
+ * Similar to a multi-pass shader.
+ * Though what it does is combine the code of all the shaders into one.
+ * @author MaybeMaru
+ */
 class FlxChainedShader extends #if !flash flixel.addons.display.FlxRuntimeShader #else FlxShader #end
 {
 	// TODO: add a "setShaders" function

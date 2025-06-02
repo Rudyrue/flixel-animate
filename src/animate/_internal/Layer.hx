@@ -145,7 +145,7 @@ class Layer implements IFlxDestroyable
 
 	public function toString():String
 	{
-		return '{name: "$name"}';
+		return '{name: "$name", frameCount: $frameCount}';
 	}
 }
 
