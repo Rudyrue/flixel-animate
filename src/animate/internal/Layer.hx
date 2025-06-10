@@ -1,4 +1,4 @@
-package animate._internal;
+package animate.internal;
 
 import animate.FlxAnimateJson.LayerJson;
 import flixel.util.FlxDestroyUtil;
@@ -40,7 +40,7 @@ class Layer implements IFlxDestroyable
 		frameIndices = null;
 	}
 
-	@:allow(animate._internal.Timeline)
+	@:allow(animate.internal.Timeline)
 	function __loadJson(layer:LayerJson, parent:FlxAnimateFrames, ?map:Map<String, Layer>):Void
 	{
 		this.name = layer.LN;

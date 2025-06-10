@@ -1,6 +1,6 @@
-package animate._internal.filters;
+package animate.internal.filters;
 
-import animate._internal.filters.Blend;
+import animate.internal.filters.Blend;
 import openfl.display.BitmapData;
 import openfl.display.GraphicsShader;
 import openfl.geom.Point;

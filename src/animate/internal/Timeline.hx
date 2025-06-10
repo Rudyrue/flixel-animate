@@ -1,6 +1,7 @@
-package animate._internal;
+package animate.internal;
 
 import animate.FlxAnimateJson.TimelineJson;
+import animate.internal.elements.*;
 import flixel.FlxCamera;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;

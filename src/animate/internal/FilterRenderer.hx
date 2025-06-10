@@ -1,8 +1,8 @@
-package animate._internal;
+package animate.internal;
 
 #if !flash
-import animate._internal.Element;
-import animate._internal.filters.MaskShader;
+import animate.internal.elements.*;
+import animate.internal.filters.MaskShader;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
@@ -31,7 +31,7 @@ import openfl.geom.Rectangle;
 @:access(openfl.display3D.Context3D)
 @:access(openfl.geom.Rectangle)
 @:access(openfl.geom.Point)
-@:access(openfl.display._internal.DrawCommandBuffer)
+@:access(openfl.display.internal.DrawCommandBuffer)
 @:access(openfl.display.Graphics)
 @:access(openfl.geom.ColorTransform)
 @:access(openfl.display.BitmapData)

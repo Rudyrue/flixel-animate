@@ -2,7 +2,7 @@ package animate;
 
 import animate.FlxAnimateController.FlxAnimateAnimation;
 import animate.FlxAnimateJson;
-import animate._internal.*;
+import animate.internal.*;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;

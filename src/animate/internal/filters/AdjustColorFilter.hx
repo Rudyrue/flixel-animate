@@ -1,4 +1,4 @@
-package animate._internal.filters;
+package animate.internal.filters;
 
 import flixel.math.FlxMath;
 import openfl.filters.ColorMatrixFilter;

@@ -1,7 +1,7 @@
-package animate._internal;
+package animate.internal;
 
 import animate.FlxAnimateJson.FrameJson;
-import animate._internal.Element;
+import animate.internal.elements.*;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.math.FlxMatrix;
@@ -33,7 +33,7 @@ class Frame implements IFlxDestroyable
 
 	public var sound:Null<FlxSound>;
 
-	@:allow(animate._internal.Layer)
+	@:allow(animate.internal.Layer)
 	function __loadJson(frame:FrameJson, parent:FlxAnimateFrames):Void
 	{
 		this.index = frame.I;
@@ -71,7 +71,7 @@ class Frame implements IFlxDestroyable
 		layer = null;
 	}
 
-	@:allow(animate._internal.Layer)
+	@:allow(animate.internal.Layer)
 	var _dirty:Bool = false;
 	var bakedElement:Null<AtlasInstance> = null;
 

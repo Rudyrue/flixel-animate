@@ -1,4 +1,4 @@
-package animate._internal.filters;
+package animate.internal.filters;
 
 #if !flash
 import flixel.FlxG;
