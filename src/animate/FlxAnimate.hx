@@ -128,6 +128,7 @@ class FlxAnimate extends FlxSprite
 		camera.drawPixels(stageBg.frame, stageBg.framePixels, stageBg._matrix, stageBg.colorTransform, blend, antialiasing, shader);
 	}
 
+	// semi stolen from FlxSkewedSprite
 	static var _skewMatrix:FlxMatrix = new FlxMatrix();
 
 	function updateSkew()

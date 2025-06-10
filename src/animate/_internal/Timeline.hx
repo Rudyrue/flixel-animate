@@ -3,11 +3,16 @@ package animate._internal;
 import animate.FlxAnimateJson.TimelineJson;
 import flixel.FlxCamera;
 import flixel.math.FlxMatrix;
+import flixel.math.FlxPoint;
+import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
 
+@:access(openfl.geom.Point)
+@:access(openfl.geom.Matrix)
+@:access(flixel.graphics.frames.FlxFrame)
 class Timeline implements IFlxDestroyable
 {
 	public var libraryItem:SymbolItem;
@@ -129,8 +134,59 @@ class Timeline implements IFlxDestroyable
 		}
 	}
 
+	public function getBounds(frameIndex:Int, ?includeHiddenLayers:Bool = false, ?rect:FlxRect, ?matrix:FlxMatrix):FlxRect
+	{
+		var tmpRect:FlxRect = FlxRect.get();
+		rect ??= FlxRect.get();
+		rect.set(Math.POSITIVE_INFINITY, Math.POSITIVE_INFINITY, Math.NEGATIVE_INFINITY, Math.NEGATIVE_INFINITY);
+
+		forEachLayer((layer) ->
+		{
+			if (!layer.visible && !includeHiddenLayers)
+				return;
+
+			var frame = layer.getFrameAtIndex(frameIndex);
+			var frameBounds = frame.getBounds(tmpRect, matrix);
+			rect = expandBounds(rect, frameBounds);
+		});
+
+		tmpRect.put();
+		return rect;
+	}
+
 	public function toString():String
 	{
 		return '{name: $name, frameCount: $frameCount}';
+	}
+
+	@:noCompletion
+	public static function expandBounds(baseBounds:FlxRect, expandedBounds:FlxRect):FlxRect
+	{
+		baseBounds.x = Math.min(baseBounds.x, expandedBounds.x);
+		baseBounds.y = Math.min(baseBounds.y, expandedBounds.y);
+		baseBounds.width = Math.max(baseBounds.right, expandedBounds.right) - baseBounds.x;
+		baseBounds.height = Math.max(baseBounds.bottom, expandedBounds.bottom) - baseBounds.y;
+		return baseBounds;
+	}
+
+	@:noCompletion
+	public static function applyMatrixToRect(rect:FlxRect, matrix:FlxMatrix):FlxRect
+	{
+		var p1x = rect.left * matrix.a + rect.top * matrix.c + matrix.tx;
+		var p1y = rect.left * matrix.b + rect.top * matrix.d + matrix.ty;
+		var p2x = rect.right * matrix.a + rect.top * matrix.c + matrix.tx;
+		var p2y = rect.right * matrix.b + rect.top * matrix.d + matrix.ty;
+		var p3x = rect.left * matrix.a + rect.bottom * matrix.c + matrix.tx;
+		var p3y = rect.left * matrix.b + rect.bottom * matrix.d + matrix.ty;
+		var p4x = rect.right * matrix.a + rect.bottom * matrix.c + matrix.tx;
+		var p4y = rect.right * matrix.b + rect.bottom * matrix.d + matrix.ty;
+
+		var minX = Math.min(Math.min(p1x, p2x), Math.min(p3x, p4x));
+		var minY = Math.min(Math.min(p1y, p2y), Math.min(p3y, p4y));
+		var maxX = Math.max(Math.max(p1x, p2x), Math.max(p3x, p4x));
+		var maxY = Math.max(Math.max(p1y, p2y), Math.max(p3y, p4y));
+
+		rect.set(minX, minY, maxX - minX, maxY - minY);
+		return rect;
 	}
 }

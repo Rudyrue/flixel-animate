@@ -5,10 +5,12 @@ import animate._internal.Element;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.math.FlxMatrix;
+import flixel.math.FlxRect;
 import flixel.sound.FlxSound;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BlendMode;
+import openfl.display.Timeline;
 import openfl.geom.ColorTransform;
 
 @:nullSafety(Strict)
@@ -40,7 +42,20 @@ class Frame implements IFlxDestroyable
 		for (element in frame.E)
 		{
 			var si = element.SI;
-			this.elements.push((si != null) ? new SymbolInstance(element.SI, parent) : new AtlasInstance(element.ASI, parent));
+			if (si != null)
+			{
+				this.elements.push(switch (si.ST)
+				{
+					case "B" | "button":
+						new ButtonInstance(element.SI, parent);
+					default:
+						new SymbolInstance(element.SI, parent);
+				});
+			}
+			else
+			{
+				this.elements.push(new AtlasInstance(element.ASI, parent));
+			}
 		}
 
 		if (frame.SND != null)
@@ -77,6 +92,22 @@ class Frame implements IFlxDestroyable
 	{
 		for (element in elements)
 			callback(element);
+	}
+
+	public function getBounds(?rect:FlxRect, ?matrix:FlxMatrix):FlxRect
+	{
+		var tmpRect = FlxRect.get();
+		rect ??= FlxRect.get();
+		rect.set(Math.POSITIVE_INFINITY, Math.POSITIVE_INFINITY, Math.NEGATIVE_INFINITY, Math.NEGATIVE_INFINITY);
+
+		forEachElement((element) ->
+		{
+			tmpRect = element.getBounds(tmpRect, matrix);
+			rect = Timeline.expandBounds(rect, tmpRect);
+		});
+
+		tmpRect.put();
+		return rect;
 	}
 
 	public function draw(camera:FlxCamera, currentFrame:Int, layer:Layer, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode,

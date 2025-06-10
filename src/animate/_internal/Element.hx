@@ -13,20 +13,18 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
-import openfl.display.BitmapData;
+import flixel.util.FlxSignal;
 import openfl.display.BlendMode;
+import openfl.display.Timeline;
 import openfl.filters.BitmapFilter;
 import openfl.filters.BlurFilter;
-import openfl.filters.ColorMatrixFilter;
 import openfl.geom.ColorTransform;
-import openfl.geom.Point;
-import openfl.geom.Rectangle;
 
 using flixel.util.FlxColorTransformUtil;
 
-typedef Element = BaseElement<Dynamic>;
+typedef Element = AnimateElement<Dynamic>;
 
-class BaseElement<T> implements IFlxDestroyable
+class AnimateElement<T> implements IFlxDestroyable
 {
 	var _mat:FlxMatrix;
 
@@ -54,9 +52,17 @@ class BaseElement<T> implements IFlxDestroyable
 
 	public inline function toAtlasInstance():AtlasInstance
 		return cast this;
+
+	public inline function toButtonInstance():ButtonInstance
+		return cast this;
+
+	public function getBounds(?rect:FlxRect, ?matrix:FlxMatrix):FlxRect
+	{
+		return rect ?? FlxRect.get();
+	}
 }
 
-class SymbolInstance extends BaseElement<SymbolInstanceJson>
+class SymbolInstance extends AnimateElement<SymbolInstanceJson>
 {
 	var libraryItem:SymbolItem;
 
@@ -149,7 +155,7 @@ class SymbolInstance extends BaseElement<SymbolInstanceJson>
 	function bakeFilters(?filters:Array<FilterJson>):Void
 	{
 		#if !flash
-		if (filters == null || filters.length <= 0)
+		if (!isMovieClip || filters == null || filters.length <= 0)
 			return;
 
 		var bitmapFilters:Array<BitmapFilter> = [];
@@ -247,6 +253,26 @@ class SymbolInstance extends BaseElement<SymbolInstanceJson>
 		return frameIndex;
 	}
 
+	final tmpMatrix:FlxMatrix = new FlxMatrix();
+
+	override function getBounds(?rect:FlxRect, ?matrix:FlxMatrix):FlxRect
+	{
+		var targetMatrix:FlxMatrix;
+		if (matrix != null)
+		{
+			tmpMatrix.copyFrom(this.matrix);
+			tmpMatrix.concat(matrix);
+			targetMatrix = tmpMatrix;
+		}
+		else
+			targetMatrix = this.matrix;
+
+		if (bakedElement != null)
+			return bakedElement.getBounds(rect, targetMatrix);
+
+		return libraryItem.timeline.getBounds(libraryItem.timeline.currentFrame, null, rect, targetMatrix);
+	}
+
 	public function toString():String
 	{
 		return '{name: ${libraryItem.name}, matrix: $matrix}';
@@ -256,7 +282,7 @@ class SymbolInstance extends BaseElement<SymbolInstanceJson>
 @:access(openfl.geom.Point)
 @:access(openfl.geom.Matrix)
 @:access(flixel.graphics.frames.FlxFrame)
-class AtlasInstance extends BaseElement<AtlasInstanceJson>
+class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 {
 	public var frame:FlxFrame;
 
@@ -309,7 +335,7 @@ class AtlasInstance extends BaseElement<AtlasInstanceJson>
 		_mat.concat(matrix);
 		_mat.concat(parentMatrix);
 
-		if (!isOnScreen(camera, frame.frame, _mat))
+		if (!isOnScreen(camera, _mat))
 			return;
 
 		#if flash
@@ -318,9 +344,9 @@ class AtlasInstance extends BaseElement<AtlasInstanceJson>
 		camera.drawPixels(frame, null, _mat, transform, blend, antialiasing, shader);
 		#end
 
-		#if (FLX_DEBUG && !flash)
+		#if FLX_DEBUG
 		if (FlxG.debugger.drawDebug)
-			drawBoundingBox(camera, frame.frame, _mat);
+			drawBoundingBox(camera, _bounds);
 		#end
 	}
 
@@ -354,35 +380,36 @@ class AtlasInstance extends BaseElement<AtlasInstanceJson>
 	@:allow(animate._internal.FilterRenderer)
 	private static var __skipIsOnScreen:Bool = false;
 
-	public function isOnScreen(cam:FlxCamera, rect:FlxRect, m:FlxMatrix):Bool
+	public function isOnScreen(camera:FlxCamera, matrix:FlxMatrix):Bool
 	{
-		#if flash
-		return true;
-		#else
-		if (__skipIsOnScreen) // too lazy
+		if (__skipIsOnScreen)
 			return true;
 
-		var p1 = p1.set(m.__transformX(0, 0), m.__transformY(0, 0));
-		var p2 = p2.set(m.__transformX(rect.width, 0), m.__transformY(rect.width, 0));
-		var p3 = p3.set(m.__transformX(0, rect.height), m.__transformY(0, rect.height));
-		var p4 = p4.set(m.__transformX(rect.width, rect.height), m.__transformY(rect.width, rect.height));
+		var bounds = _bounds.set(0, 0, frame.frame.width, frame.frame.height);
+		Timeline.applyMatrixToRect(bounds, matrix);
 
-		var minX = Math.min(Math.min(p1.x, p2.x), Math.min(p3.x, p4.x));
-		var minY = Math.min(Math.min(p1.y, p2.y), Math.min(p3.y, p4.y));
-		var maxX = Math.max(Math.max(p1.x, p2.x), Math.max(p3.x, p4.x));
-		var maxY = Math.max(Math.max(p1.y, p2.y), Math.max(p3.y, p4.y));
+		return camera.containsRect(bounds);
+	}
 
-		_bounds.set(minX, minY, maxX - minX, maxY - minY);
-		return cam.containsRect(_bounds);
-		#end
+	override function getBounds(?rect:FlxRect, ?matrix:FlxMatrix):FlxRect
+	{
+		var rect = super.getBounds(rect);
+		rect.set(0, 0, frame.frame.width, frame.frame.height);
+
+		Timeline.applyMatrixToRect(rect, frame.prepareMatrix(_mat));
+		Timeline.applyMatrixToRect(rect, this.matrix);
+		if (matrix != null)
+			Timeline.applyMatrixToRect(rect, matrix);
+
+		return rect;
 	}
 
 	#if FLX_DEBUG
-	function drawBoundingBox(camera:FlxCamera, rect:FlxRect, m:FlxMatrix):Void
+	public static function drawBoundingBox(camera:FlxCamera, rect:FlxRect, ?color:FlxColor = FlxColor.BLUE):Void
 	{
 		var gfx = camera.debugLayer.graphics;
-		gfx.lineStyle(1, FlxColor.BLUE, 0.75);
-		gfx.drawRect(_bounds.x + 0.5, _bounds.y + 0.5, _bounds.width - 1.0, _bounds.height - 1.0);
+		gfx.lineStyle(1, color, 0.75);
+		gfx.drawRect(rect.x + 0.5, rect.y + 0.5, rect.width - 1.0, rect.height - 1.0);
 	}
 	#end
 
@@ -390,4 +417,85 @@ class AtlasInstance extends BaseElement<AtlasInstanceJson>
 	{
 		return '{frame: ${frame.name}, matrix: $matrix}';
 	}
+}
+
+class ButtonInstance extends SymbolInstance
+{
+	public function new(data:SymbolInstanceJson, parent:FlxAnimateFrames)
+	{
+		super(data, parent);
+
+		this.isMovieClip = false;
+		this.curButtonState = ButtonState.UP;
+		this.onClick = new FlxSignal();
+		this._hitbox = FlxRect.get();
+	}
+
+	public var curButtonState(default, null):ButtonState;
+
+	public var onClick:FlxSignal;
+
+	override function getFrameIndex(index:Int, frame:Frame):Int
+	{
+		return curButtonState;
+	}
+
+	override function draw(camera:FlxCamera, index:Int, tlFrame:Frame, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode,
+			?antialiasing:Bool, ?shader:FlxShader)
+	{
+		updateButtonState(camera, parentMatrix);
+
+		super.draw(camera, index, tlFrame, parentMatrix, transform, blend, antialiasing, shader);
+
+		#if FLX_DEBUG
+		if (FlxG.debugger.drawDebug)
+			AtlasInstance.drawBoundingBox(camera, _hitbox, FlxColor.PURPLE);
+		#end
+	}
+
+	var _hitbox:FlxRect;
+
+	static var mousePos:FlxPoint = FlxPoint.get();
+
+	function updateButtonState(camera:FlxCamera, drawMatrix:FlxMatrix)
+	{
+		_hitbox = getBounds(_hitbox, drawMatrix);
+
+		var mousePos = FlxG.mouse.getViewPosition(camera, mousePos);
+		var isOverlaped = _hitbox.containsXY(mousePos.x, mousePos.y);
+
+		if (isOverlaped)
+		{
+			this.curButtonState = FlxG.mouse.pressed ? ButtonState.DOWN : ButtonState.OVER;
+			if (FlxG.mouse.justPressed)
+				onClick.dispatch();
+		}
+		else
+		{
+			this.curButtonState = ButtonState.UP;
+		}
+	}
+
+	override function getBounds(?rect:FlxRect, ?matrix:FlxMatrix):FlxRect
+	{
+		var bounds = this.libraryItem.timeline.getBounds(ButtonState.HIT, false, rect, this.matrix);
+		if (matrix != null)
+			bounds = Timeline.applyMatrixToRect(bounds, matrix);
+		return bounds;
+	}
+
+	override function destroy()
+	{
+		super.destroy();
+		_hitbox = FlxDestroyUtil.put(_hitbox);
+		onClick = null;
+	}
+}
+
+enum abstract ButtonState(Int) to Int
+{
+	var UP = 0;
+	var OVER = 1;
+	var DOWN = 2;
+	var HIT = 3;
 }

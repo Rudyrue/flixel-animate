@@ -5,3 +5,4 @@ assets
 Project.xml
 src/Main.hx
 src/PlayState.hx
+src/animate/FlxChainedShader.hx
