@@ -1,7 +1,7 @@
 # flixel-animate
 
-Flixel-animate is a HaxeFlixel library meant to load texture atlases generated both from Adobe Animate and the BetterTextureAtlas plugin.
-The library is heavily inspired by FlxAnimate, though with some differences to work like the Animate JSFL implementation.
+Flixel-animate is a [HaxeFlixel](https://haxeflixel.com/) library meant to load texture atlases generated both from Adobe Animate and the [BetterTextureAtlas plugin](https://github.com/Dot-Stuff/BetterTextureAtlas).
+The library is heavily inspired by [FlxAnimate](https://github.com/Dot-Stuff/flxanimate), though with some differences to work similarly to the Flash/Animate JSFL implementation.
 
 ## How to use
 
