@@ -25,6 +25,7 @@ using flixel.util.FlxColorTransformUtil;
 
 @:access(openfl.geom.Point)
 @:access(openfl.geom.Matrix)
+@:access(flixel.FlxCamera)
 @:access(flixel.graphics.frames.FlxFrame)
 class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 {
@@ -114,15 +115,10 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 	}
 	#end
 
-	static var p1 = FlxPoint.get();
-	static var p2 = FlxPoint.get();
-	static var p3 = FlxPoint.get();
-	static var p4 = FlxPoint.get();
-
-	var _bounds:FlxRect = FlxRect.get();
-
 	@:allow(animate.internal.FilterRenderer)
 	private static var __skipIsOnScreen:Bool = false;
+
+	var _bounds:FlxRect = FlxRect.get();
 
 	public function isOnScreen(camera:FlxCamera, matrix:FlxMatrix):Bool
 	{
@@ -149,11 +145,31 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 	}
 
 	#if FLX_DEBUG
-	public static function drawBoundingBox(camera:FlxCamera, rect:FlxRect, ?color:FlxColor = FlxColor.BLUE):Void
+	public static function drawBoundingBox(camera:FlxCamera, bounds:FlxRect, ?color:FlxColor = FlxColor.BLUE):Void
 	{
+		#if flash
+		var cBounds = camera.transformRect(bounds.copyTo(FlxRect.get()));
+		FlxG.signals.postDraw.addOnce(() ->
+		{
+			var rect = new openfl.geom.Rectangle();
+			var buffer = FlxG.camera.buffer;
+
+			rect.setTo(cBounds.x, cBounds.y, cBounds.width, 1);
+			buffer.fillRect(rect, color);
+			rect.setTo(cBounds.x, cBounds.y + cBounds.height - 1, cBounds.width, 1);
+			buffer.fillRect(rect, color);
+			rect.setTo(cBounds.x, cBounds.y, 1, cBounds.height);
+			buffer.fillRect(rect, color);
+			rect.setTo(cBounds.x + cBounds.width - 1, cBounds.y, 1, cBounds.height);
+			buffer.fillRect(rect, color);
+
+			cBounds.put();
+		});
+		#else
 		var gfx = camera.debugLayer.graphics;
 		gfx.lineStyle(1, color, 0.75);
-		gfx.drawRect(rect.x + 0.5, rect.y + 0.5, rect.width - 1.0, rect.height - 1.0);
+		gfx.drawRect(bounds.x + 0.5, bounds.y + 0.5, bounds.width - 1.0, bounds.height - 1.0);
+		#end
 	}
 	#end
 

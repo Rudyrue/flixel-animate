@@ -58,14 +58,13 @@ class ButtonInstance extends SymbolInstance
 
 	var _hitbox:FlxRect;
 
-	static var mousePos:FlxPoint = FlxPoint.get();
-
-	function updateButtonState(camera:FlxCamera, drawMatrix:FlxMatrix)
+	function updateButtonState(camera:FlxCamera, drawMatrix:FlxMatrix):Void
 	{
 		_hitbox = getBounds(_hitbox, drawMatrix);
 
-		var mousePos = FlxG.mouse.getViewPosition(camera, mousePos);
+		var mousePos = FlxG.mouse.getViewPosition(camera, FlxPoint.get());
 		var isOverlaped = _hitbox.containsXY(mousePos.x, mousePos.y);
+		mousePos.put();
 
 		if (isOverlaped)
 		{
@@ -87,11 +86,16 @@ class ButtonInstance extends SymbolInstance
 		return bounds;
 	}
 
-	override function destroy()
+	override function destroy():Void
 	{
 		super.destroy();
 		_hitbox = FlxDestroyUtil.put(_hitbox);
 		onClick = null;
+	}
+
+	override function toString():String
+	{
+		return '{name: ${libraryItem.name}, matrix: $matrix, curButtonState: $curButtonState}';
 	}
 }
 
@@ -101,4 +105,15 @@ enum abstract ButtonState(Int) to Int
 	var OVER = 1;
 	var DOWN = 2;
 	var HIT = 3;
+
+	public inline function toString():String
+	{
+		return switch (cast this)
+		{
+			case UP: "UP";
+			case OVER: "OVER";
+			case DOWN: "DOWN";
+			case HIT: "HIT";
+		}
+	}
 }
