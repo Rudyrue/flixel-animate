@@ -1,6 +1,8 @@
 package animate.internal;
 
 import animate.FlxAnimateJson.LayerJson;
+import flixel.math.FlxMatrix;
+import flixel.math.FlxRect;
 import flixel.util.FlxDestroyUtil;
 
 class Layer implements IFlxDestroyable
@@ -143,9 +145,21 @@ class Layer implements IFlxDestroyable
 			frameIndices[index + i] = frames.length - 1;
 	}
 
+	public function getBounds(frameIndex:Int, ?rect:FlxRect, ?matrix:FlxMatrix):FlxRect
+	{
+		rect ??= FlxRect.get();
+		var frame = getFrameAtIndex(frameIndex);
+		if (frame != null)
+			return frame.getBounds(rect, matrix);
+
+		if (matrix != null)
+			Timeline.applyMatrixToRect(rect, matrix);
+		return rect;
+	}
+
 	public function toString():String
 	{
-		return '{name: "$name", frameCount: $frameCount}';
+		return '{name: "$name", frameCount: $frameCount, layerType: $layerType}';
 	}
 }
 

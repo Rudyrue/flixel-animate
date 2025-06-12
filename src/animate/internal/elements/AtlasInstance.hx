@@ -15,6 +15,7 @@ import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSignal;
+import haxe.ds.Vector;
 import openfl.display.BlendMode;
 import openfl.display.Timeline;
 import openfl.filters.BitmapFilter;
@@ -57,8 +58,9 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 		if (adjustScale)
 		{
 			var lastFrame = this.frame;
-			copyFrame.tileMatrix[0] = lastFrame.frame.width / frame.frame.width;
-			copyFrame.tileMatrix[3] = lastFrame.frame.height / frame.frame.height;
+			var tileMatrix:Vector<Float> = cast copyFrame.tileMatrix;
+			tileMatrix[0] = lastFrame.frame.width / frame.frame.width;
+			tileMatrix[3] = lastFrame.frame.height / frame.frame.height;
 		}
 
 		this.frame = copyFrame;

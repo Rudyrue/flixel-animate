@@ -45,10 +45,10 @@ class Timeline implements IFlxDestroyable
 			__layerMap.set(layer.name, layer);
 		}
 
-		for (i => layerJson in layersJson)
+		for (i in 0...layersJson.length)
 		{
 			var layer = layers[layers.length - i - 1];
-			layer.__loadJson(layerJson, parent, __layerMap);
+			layer.__loadJson(layersJson[i], parent, __layerMap);
 
 			if (layer.frameCount > frameCount)
 				frameCount = layer.frameCount;
@@ -62,7 +62,7 @@ class Timeline implements IFlxDestroyable
 		layers = FlxDestroyUtil.destroyArray(layers);
 	}
 
-	public function signalFrameChange(frameIndex:Int)
+	public function signalFrameChange(frameIndex:Int):Void
 	{
 		for (layer in layers)
 		{
@@ -135,21 +135,25 @@ class Timeline implements IFlxDestroyable
 		}
 	}
 
-	public function getBounds(frameIndex:Int, ?includeHiddenLayers:Bool = false, ?rect:FlxRect, ?matrix:FlxMatrix):FlxRect
+	public function getBounds(frameIndex:Int, ?includeHiddenLayers:Bool, ?rect:FlxRect, ?matrix:FlxMatrix):FlxRect
 	{
+		includeHiddenLayers ??= false;
 		var tmpRect:FlxRect = FlxRect.get();
 		rect ??= FlxRect.get();
 		rect.set(Math.POSITIVE_INFINITY, Math.POSITIVE_INFINITY, Math.NEGATIVE_INFINITY, Math.NEGATIVE_INFINITY);
 
-		forEachLayer((layer) ->
+		for (layer in layers)
 		{
 			if (!layer.visible && !includeHiddenLayers)
-				return;
+				continue;
 
 			var frame = layer.getFrameAtIndex(frameIndex);
+			if (frame == null)
+				continue;
+
 			var frameBounds = frame.getBounds(tmpRect, matrix);
 			rect = expandBounds(rect, frameBounds);
-		});
+		}
 
 		tmpRect.put();
 		return rect;

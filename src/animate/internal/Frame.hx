@@ -73,7 +73,7 @@ class Frame implements IFlxDestroyable
 
 	@:allow(animate.internal.Layer)
 	var _dirty:Bool = false;
-	var bakedElement:Null<AtlasInstance> = null;
+	var bakedFrame:Null<AtlasInstance> = null;
 
 	function bakeFrame(currentFrame:Int, layer:Layer):Void
 	{
@@ -81,10 +81,10 @@ class Frame implements IFlxDestroyable
 		if (layer.parentLayer == null)
 			return;
 
-		bakedElement = FilterRenderer.maskFrame(this, currentFrame, layer);
+		bakedFrame = FilterRenderer.maskFrame(this, currentFrame, layer);
 
-		if (bakedElement != null && (bakedElement.frame.frame.width <= 1 || bakedElement.frame.frame.height <= 1))
-			bakedElement.visible = false;
+		if (bakedFrame != null && (bakedFrame.frame.frame.width <= 1 || bakedFrame.frame.frame.height <= 1))
+			bakedFrame.visible = false;
 		#end
 	}
 
@@ -100,11 +100,11 @@ class Frame implements IFlxDestroyable
 		rect ??= FlxRect.get();
 		rect.set(Math.POSITIVE_INFINITY, Math.POSITIVE_INFINITY, Math.NEGATIVE_INFINITY, Math.NEGATIVE_INFINITY);
 
-		forEachElement((element) ->
+		for (element in elements)
 		{
 			tmpRect = element.getBounds(tmpRect, matrix);
 			rect = Timeline.expandBounds(rect, tmpRect);
-		});
+		}
 
 		tmpRect.put();
 		return rect;
@@ -119,10 +119,10 @@ class Frame implements IFlxDestroyable
 			bakeFrame(currentFrame, layer);
 		}
 
-		if (bakedElement != null)
+		if (bakedFrame != null)
 		{
-			if (bakedElement.visible)
-				bakedElement.draw(camera, currentFrame, this, parentMatrix, transform, blend, antialiasing, shader);
+			if (bakedFrame.visible)
+				bakedFrame.draw(camera, currentFrame, this, parentMatrix, transform, blend, antialiasing, shader);
 			return;
 		}
 
