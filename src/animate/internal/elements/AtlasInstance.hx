@@ -41,11 +41,23 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 			this.frame = parent.getByName(data.N);
 			this.matrix = data.MX.toMatrix();
 
-			#if flash // FlxFrame.paint doesnt work for rotated frames lol
+			#if flash
+			// FlxFrame.paint doesnt work for rotated frames lol
 			var bitmap = this.frame.checkInputBitmap(null, null, this.frame.angle);
 			var mat = this.frame.prepareBlitMatrix(FlxFrame._matrix, true);
 			bitmap.draw(this.frame.parent.bitmap, mat, null, null, this.frame.getDrawFrameRect(mat, FlxFrame._rect));
 			this.frame = FlxGraphic.fromBitmapData(bitmap).imageFrame.frame;
+			#else
+			// new flixel broke the tileMatrix on hashlink, gotta manually do this shit
+			// TODO: remove this when it gets fixed on flixel 6.1.1 or something
+			var mat = this.frame.prepareBlitMatrix(FlxFrame._matrix, false);
+			var tileMatrix:Vector<Float> = cast this.frame.tileMatrix;
+			tileMatrix[0] = mat.a;
+			tileMatrix[1] = mat.b;
+			tileMatrix[2] = mat.c;
+			tileMatrix[3] = mat.d;
+			tileMatrix[4] = mat.tx;
+			tileMatrix[5] = mat.ty;
 			#end
 		}
 	}

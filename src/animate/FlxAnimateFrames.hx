@@ -118,7 +118,7 @@ class FlxAnimateFrames extends FlxAtlasFrames
 		}
 
 		frames.frameRate = animation.MD.FRT;
-		frames.timeline = new Timeline(animation.AN.TL, frames, animation.AN.N);
+		frames.timeline = new Timeline(animation.AN.TL, frames, animation.AN.SN);
 		frames.dictionary.set(frames.timeline.name, new SymbolItem(frames.timeline)); // Add main symbol to the library too
 
 		// stage background color

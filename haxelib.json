@@ -4,6 +4,7 @@
     "license": "MIT",
     "tags": ["flixel", "adobe"],
     "description": "Personal HaxeFlixel Adobe Animate texture atlas implementation.",
+    "classPath": "src/",
     "version": "1.0.0",
     "releasenote": "Initial release.",
     "contributors": ["MaybeMaru"],

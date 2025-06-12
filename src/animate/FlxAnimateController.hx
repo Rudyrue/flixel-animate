@@ -7,7 +7,7 @@ import flixel.animation.FlxAnimationController;
 
 class FlxAnimateController extends FlxAnimationController
 {
-	public function addByLabel(name:String, label:String, ?frameRate:Float, ?looped:Bool):Void
+	public function addByFrameLabel(name:String, label:String, ?frameRate:Float, ?looped:Bool):Void
 	{
 		if (!isAnimate)
 		{
@@ -15,7 +15,7 @@ class FlxAnimateController extends FlxAnimationController
 			return;
 		}
 
-		var foundFrames = findLabelIndices(label);
+		var foundFrames = findFrameLabelIndices(label);
 
 		if (foundFrames.length <= 0)
 		{
@@ -30,7 +30,7 @@ class FlxAnimateController extends FlxAnimationController
 		_animations.set(name, anim);
 	}
 
-	public function addByLabelIndices(name:String, label:String, indices:Array<Int>, ?frameRate:Float, ?looped:Bool)
+	public function addByFrameLabelIndices(name:String, label:String, indices:Array<Int>, ?frameRate:Float, ?looped:Bool)
 	{
 		if (!isAnimate)
 		{
@@ -38,7 +38,7 @@ class FlxAnimateController extends FlxAnimationController
 			return;
 		}
 
-		var foundFrames:Array<Int> = findLabelIndices(label);
+		var foundFrames:Array<Int> = findFrameLabelIndices(label);
 		var useableFrames:Array<Int> = [];
 
 		for (index in indices)
@@ -130,7 +130,7 @@ class FlxAnimateController extends FlxAnimationController
 		_animations.set(name, anim);
 	}
 
-	function findLabelIndices(label:String):Array<Int>
+	public function findFrameLabelIndices(label:String):Array<Int>
 	{
 		var foundFrames:Array<Int> = [];
 		var hasFoundLabel:Bool = false;

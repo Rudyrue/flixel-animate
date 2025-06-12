@@ -71,7 +71,7 @@ class FlxAnimate extends FlxSprite
 		}
 	}
 
-	public var applyStageMatrix:Bool = true;
+	public var applyStageMatrix:Bool = false;
 	public var renderStage:Bool = false;
 
 	function drawAnimate(camera:FlxCamera)

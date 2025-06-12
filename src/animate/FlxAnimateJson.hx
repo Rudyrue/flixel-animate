@@ -40,11 +40,15 @@ abstract AnimationJson(Dynamic)
 abstract AnimationDataJson(Dynamic)
 {
 	public var N(get, never):String;
+	public var SN(get, never):String;
 	public var TL(get, never):TimelineJson;
 	public var STI(get, never):Null<SymbolInstanceJson>;
 
 	inline function get_N()
 		return this.N ?? this.name;
+
+	inline function get_SN()
+		return this.SN ?? this.SYMBOL_name;
 
 	inline function get_TL()
 		return this.TL ?? this.TIMELINE;
