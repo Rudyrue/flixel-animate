@@ -43,7 +43,7 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 
 			#if flash // FlxFrame.paint doesnt work for rotated frames lol
 			var bitmap = this.frame.checkInputBitmap(null, null, this.frame.angle);
-			var mat = this.frame.fillBlitMatrix(FlxFrame._matrix);
+			var mat = this.frame.prepareBlitMatrix(FlxFrame._matrix, true);
 			bitmap.draw(this.frame.parent.bitmap, mat, null, null, this.frame.getDrawFrameRect(mat, FlxFrame._rect));
 			this.frame = FlxGraphic.fromBitmapData(bitmap).imageFrame.frame;
 			#end
@@ -58,7 +58,7 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 		if (adjustScale)
 		{
 			var lastFrame = this.frame;
-			var tileMatrix:Vector<Float> = cast copyFrame.tileMatrix;
+			var tileMatrix:Vector<Float> = cast copyFrame.tileMatrix; // need to cast because of newer flixel
 			tileMatrix[0] = lastFrame.frame.width / frame.frame.width;
 			tileMatrix[3] = lastFrame.frame.height / frame.frame.height;
 		}
@@ -146,6 +146,10 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 		return rect;
 	}
 
+	#if (FLX_DEBUG && flash)
+	static final __fillRect = new openfl.geom.Rectangle();
+	#end
+
 	#if FLX_DEBUG
 	public static function drawBoundingBox(camera:FlxCamera, bounds:FlxRect, ?color:FlxColor = FlxColor.BLUE):Void
 	{
@@ -153,18 +157,15 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 		var cBounds = camera.transformRect(bounds.copyTo(FlxRect.get()));
 		FlxG.signals.postDraw.addOnce(() ->
 		{
-			var rect = new openfl.geom.Rectangle();
 			var buffer = FlxG.camera.buffer;
-
-			rect.setTo(cBounds.x, cBounds.y, cBounds.width, 1);
-			buffer.fillRect(rect, color);
-			rect.setTo(cBounds.x, cBounds.y + cBounds.height - 1, cBounds.width, 1);
-			buffer.fillRect(rect, color);
-			rect.setTo(cBounds.x, cBounds.y, 1, cBounds.height);
-			buffer.fillRect(rect, color);
-			rect.setTo(cBounds.x + cBounds.width - 1, cBounds.y, 1, cBounds.height);
-			buffer.fillRect(rect, color);
-
+			__fillRect.setTo(cBounds.x, cBounds.y, cBounds.width, 1);
+			buffer.fillRect(__fillRect, color);
+			__fillRect.setTo(cBounds.x, cBounds.y + cBounds.height - 1, cBounds.width, 1);
+			buffer.fillRect(__fillRect, color);
+			__fillRect.setTo(cBounds.x, cBounds.y, 1, cBounds.height);
+			buffer.fillRect(__fillRect, color);
+			__fillRect.setTo(cBounds.x + cBounds.width - 1, cBounds.y, 1, cBounds.height);
+			buffer.fillRect(__fillRect, color);
 			cBounds.put();
 		});
 		#else
