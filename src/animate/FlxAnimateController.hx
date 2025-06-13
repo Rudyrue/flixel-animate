@@ -7,7 +7,7 @@ import flixel.animation.FlxAnimationController;
 
 class FlxAnimateController extends FlxAnimationController
 {
-	public function addByFrameLabel(name:String, label:String, ?frameRate:Float, ?looped:Bool):Void
+	public function addByFrameLabel(name:String, label:String, ?frameRate:Float, ?looped:Bool = true):Void
 	{
 		if (!isAnimate)
 		{
@@ -30,7 +30,7 @@ class FlxAnimateController extends FlxAnimationController
 		_animations.set(name, anim);
 	}
 
-	public function addByFrameLabelIndices(name:String, label:String, indices:Array<Int>, ?frameRate:Float, ?looped:Bool)
+	public function addByFrameLabelIndices(name:String, label:String, indices:Array<Int>, ?frameRate:Float, ?looped:Bool = true)
 	{
 		if (!isAnimate)
 		{
@@ -61,7 +61,7 @@ class FlxAnimateController extends FlxAnimationController
 		_animations.set(name, anim);
 	}
 
-	public function addByTimeline(name:String, timeline:Timeline, ?frameRate:Float, ?looped:Bool):Void
+	public function addByTimeline(name:String, timeline:Timeline, ?frameRate:Float, ?looped:Bool = true):Void
 	{
 		if (!isAnimate)
 		{
@@ -72,7 +72,7 @@ class FlxAnimateController extends FlxAnimationController
 		addByTimelineIndices(name, timeline, [for (i in 0...timeline.frameCount) i], frameRate, looped);
 	}
 
-	public function addByTimelineIndices(name:String, timeline:Timeline, indices:Array<Int>, ?frameRate:Float, ?looped:Bool):Void
+	public function addByTimelineIndices(name:String, timeline:Timeline, indices:Array<Int>, ?frameRate:Float, ?looped:Bool = true):Void
 	{
 		if (!isAnimate)
 		{
@@ -86,7 +86,7 @@ class FlxAnimateController extends FlxAnimationController
 		_animations.set(name, anim);
 	}
 
-	public function addBySymbol(name:String, symbolName:String, ?frameRate:Float, ?looped:Bool):Void
+	public function addBySymbol(name:String, symbolName:String, ?frameRate:Float, ?looped:Bool = true):Void
 	{
 		if (!isAnimate)
 		{
@@ -108,7 +108,7 @@ class FlxAnimateController extends FlxAnimationController
 		_animations.set(name, anim);
 	}
 
-	public function addBySymbolIndices(name:String, symbolName:String, indices:Array<Int>, ?frameRate:Float, ?looped:Bool):Void
+	public function addBySymbolIndices(name:String, symbolName:String, indices:Array<Int>, ?frameRate:Float, ?looped:Bool = true):Void
 	{
 		if (!isAnimate)
 		{

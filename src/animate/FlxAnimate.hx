@@ -7,14 +7,18 @@ import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.animation.FlxAnimationController;
+import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.frames.FlxFramesCollection;
 import flixel.math.FlxAngle;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
+import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.system.FlxBGSprite;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import haxe.Json;
+import haxe.io.Path;
+import openfl.Assets;
 
 using flixel.util.FlxColorTransformUtil;
 
@@ -27,6 +31,21 @@ class FlxAnimate extends FlxSprite
 
 	public var isAnimate(default, null):Bool = false;
 	public var timeline:Timeline;
+
+	public function new(?x:Float = 0, ?y:Float = 0, ?simpleGraphic:FlxGraphicAsset)
+	{
+		var loadedAnimateAtlas:Bool = false;
+		if (simpleGraphic != null && simpleGraphic is String)
+		{
+			if (Path.extension(simpleGraphic).length == 0)
+				loadedAnimateAtlas = true;
+		}
+
+		super(x, y, loadedAnimateAtlas ? null : simpleGraphic);
+
+		if (loadedAnimateAtlas)
+			frames = FlxAnimateFrames.fromAnimate(simpleGraphic);
+	}
 
 	override function initVars()
 	{
