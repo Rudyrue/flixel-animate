@@ -5,6 +5,8 @@ import flixel.FlxG;
 import flixel.animation.FlxAnimation;
 import flixel.animation.FlxAnimationController;
 
+using StringTools;
+
 class FlxAnimateController extends FlxAnimationController
 {
 	public function addByFrameLabel(name:String, label:String, ?frameRate:Float, ?looped:Bool = true):Void
@@ -140,7 +142,7 @@ class FlxAnimateController extends FlxAnimationController
 		{
 			for (frame in layer.frames)
 			{
-				if (frame.name == label)
+				if (frame.name.rtrim() == label)
 				{
 					hasFoundLabel = true;
 

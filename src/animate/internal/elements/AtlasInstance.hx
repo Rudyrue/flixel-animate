@@ -32,6 +32,8 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 {
 	public var frame:FlxFrame;
 
+	var tileMatrix:FlxMatrix;
+
 	public function new(?data:AtlasInstanceJson, ?parent:FlxAnimateFrames, ?frame:Frame)
 	{
 		super(data, parent);
@@ -39,6 +41,7 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 		if (data != null)
 		{
 			this.frame = parent.getByName(data.N);
+			this.tileMatrix = new FlxMatrix();
 			this.matrix = data.MX.toMatrix();
 
 			#if flash
@@ -50,14 +53,7 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 			#else
 			// new flixel broke the tileMatrix on hashlink, gotta manually do this shit
 			// TODO: remove this when it gets fixed on flixel 6.1.1 or something
-			var mat = this.frame.prepareBlitMatrix(FlxFrame._matrix, false);
-			var tileMatrix:Vector<Float> = cast this.frame.tileMatrix;
-			tileMatrix[0] = mat.a;
-			tileMatrix[1] = mat.b;
-			tileMatrix[2] = mat.c;
-			tileMatrix[3] = mat.d;
-			tileMatrix[4] = mat.tx;
-			tileMatrix[5] = mat.ty;
+			this.frame.prepareBlitMatrix(tileMatrix, false);
 			#end
 		}
 	}
@@ -70,9 +66,8 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 		if (adjustScale)
 		{
 			var lastFrame = this.frame;
-			var tileMatrix:Vector<Float> = cast copyFrame.tileMatrix; // need to cast because of newer flixel
-			tileMatrix[0] = lastFrame.frame.width / frame.frame.width;
-			tileMatrix[3] = lastFrame.frame.height / frame.frame.height;
+			tileMatrix.a = lastFrame.frame.width / frame.frame.width;
+			tileMatrix.d = lastFrame.frame.height / frame.frame.height;
 		}
 
 		this.frame = copyFrame;
@@ -90,7 +85,7 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 		if (frame == null) // should add a warn here
 			return;
 
-		frame.prepareMatrix(_mat);
+		_mat.copyFrom(tileMatrix);
 		_mat.concat(matrix);
 		_mat.concat(parentMatrix);
 
