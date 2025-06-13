@@ -23,8 +23,9 @@ sprite.anim.addByTimeline("main animation", sprite.library.timeline);
 sprite.anim.play("main animation");
 ```
 
-Note that the ``sprite.anim`` variable is meant to access animation setting functions such as ``addByTimeline`` and is NOT a replacement to ``sprite.animation``.
-This means you're still capable of using ``sprite.animation.play`` and it'll play any kind of animation, both from flixel and this library.
+Note that ``sprite.anim`` is the same object as ``sprite.animation``!
+You can use any of them, at your own choice, they both will play both texture atlas and normal flixel animations.
+``sprite.anim`` only exists for type safety so you can access extra functions like ``addByTimeline`` and such.
 
 ## Ways to add animations
 

@@ -255,7 +255,7 @@ class FilterRenderer
 		filterFrame.copyTo(frame);
 	}
 
-	static function __applyFilter(target:BitmapData, target1:BitmapData, ?target2:BitmapData, bmp:BitmapData, filters:Array<BitmapFilter>)
+	static function __applyFilter(target:BitmapData, target1:BitmapData, ?target2:BitmapData, bmp:BitmapData, filters:Array<BitmapFilter>, ?point:Point)
 	{
 		if (filters == null || filters.length == 0)
 			return bmp;
@@ -281,6 +281,10 @@ class FilterRenderer
 		var rect = Rectangle.__pool.get();
 		rect.setTo(0, 0, bitmap.width, bitmap.height);
 
+		bmp.__renderTransform.identity();
+		if (point != null)
+			bmp.__renderTransform.translate(point.x, point.y);
+
 		var bestResolution = renderer.__context3D.__backBufferWantsBestResolution;
 		renderer.__context3D.__backBufferWantsBestResolution = false;
 		renderer.__scissorRect(rect);
@@ -290,8 +294,6 @@ class FilterRenderer
 		Rectangle.__pool.release(rect);
 
 		renderer.__context3D.__backBufferWantsBestResolution = bestResolution;
-
-		bmp.__renderTransform.identity();
 
 		var shader, cacheBitmap = null;
 		for (filter in filters)
