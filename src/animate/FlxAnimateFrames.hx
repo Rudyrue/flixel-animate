@@ -76,8 +76,13 @@ class FlxAnimateFrames extends FlxAtlasFrames
 
 	public static function fromAnimate(path:String):FlxAnimateFrames
 	{
-		var animContent = FlxG.assets.getText(path + "/Animation.json").replace(String.fromCharCode(0xFEFF), "");
-		var animation:AnimationJson = Json.parse(animContent);
+		final getTextFromPath = (path:String) ->
+		{
+			var content = #if (flixel >= "5.9.0") FlxG.assets.getText(path); #else #if sys sys.io.File.getContent(path); #else Assets.getText(path); #end #end
+			return content.replace(String.fromCharCode(0xFEFF), "");
+		}
+
+		var animation:AnimationJson = Json.parse(getTextFromPath(path + "/Animation.json"));
 
 		var frames = new FlxAnimateFrames(null);
 		frames.path = path;
@@ -91,7 +96,7 @@ class FlxAnimateFrames extends FlxAtlasFrames
 			var graphic = FlxG.bitmap.add(path + '/spritemap$id.png');
 			var atlas = new FlxAtlasFrames(graphic);
 
-			var smContent = FlxG.assets.getText(path + '/spritemap$id.json').replace(String.fromCharCode(0xFEFF), "");
+			var smContent = getTextFromPath(path + '/spritemap$id.json');
 			var spritemap:SpritemapJson = Json.parse(smContent);
 
 			for (sprite in spritemap.ATLAS.SPRITES)

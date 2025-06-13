@@ -62,8 +62,12 @@ class ButtonInstance extends SymbolInstance
 	{
 		_hitbox = getBounds(_hitbox, drawMatrix);
 
-		var mousePos = FlxG.mouse.getViewPosition(camera, FlxPoint.get());
-		var isOverlaped = _hitbox.containsXY(mousePos.x, mousePos.y);
+		var mousePos = #if (flixel >= "5.9.0") FlxG.mouse.getViewPosition(camera,
+			FlxPoint.get()); #else FlxG.mouse.getScreenPosition(camera, FlxPoint.get()); #end
+
+		var xPos = mousePos.x;
+		var yPos = mousePos.y;
+		var isOverlaped = xPos >= _hitbox.left && xPos <= _hitbox.right && yPos >= _hitbox.top && yPos <= _hitbox.bottom;
 		mousePos.put();
 
 		if (isOverlaped)

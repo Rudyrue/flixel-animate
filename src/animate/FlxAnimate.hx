@@ -81,7 +81,7 @@ class FlxAnimate extends FlxSprite
 			return;
 		}
 
-		for (camera in getCamerasLegacy())
+		for (camera in #if (flixel >= "5.7.0") this.getCamerasLegacy() #else this.cameras #end)
 		{
 			if (!camera.visible || !camera.exists)
 				continue;
