@@ -84,7 +84,7 @@ class FlxAnimateFrames extends FlxAtlasFrames
 
 		final getGraphic = (path:String) ->
 		{
-			return #if sys FlxGraphic.fromBitmapData(openfl.display.BitmapData.fromFile(path), false, path); #else FlxG.bitmap.add(path); #end
+			return #if (flixel < "5.9.0" && sys) FlxGraphic.fromBitmapData(openfl.display.BitmapData.fromFile(path), false, path); #else FlxG.bitmap.add(path); #end
 		}
 
 		var animation:AnimationJson = Json.parse(getTextFromPath(path + "/Animation.json"));
